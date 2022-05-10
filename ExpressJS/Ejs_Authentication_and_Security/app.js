@@ -2,6 +2,7 @@ const express = require("express");
 const bodyParser = require("body-parser");
 const ejs = require("ejs");
 const mongoose = require("mongoose");
+const encrypt = require("mongoose-encryption");
 const { stringify } = require("querystring");
 const app = express();
 app.set("view engine", "ejs");
@@ -9,10 +10,12 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.static("public"));
 mongoose.connect("mongodb://localhost:27017/userDb", { useNewUrlParser: true });
 
-const userSchema = {
+const userSchema = new mongoose.Schema({
   email: String,
   password: String,
-};
+});
+const secret = "thisisNithinEncryption";
+userSchema.plugin(encrypt, { secret: secret, encryptedFields: ["password"] });
 const User = new mongoose.model("User", userSchema);
 
 app.get("/", (req, res) => {
@@ -39,19 +42,18 @@ app.post("/register", (req, res) => {
   });
 });
 app.post("/login", (req, res) => {
-    const email = req.body.username;
-    const password =req.body.password
-    User.findOne({email:email},(err,foundUser)=>{
-        if(err){
-            console.log(err);
-        }else{
-            if(foundUser){
-                this.if(foundUser.password=== password){
-                    res.render("secrets")
-                }
-            }
+  const email = req.body.username;
+  const password = req.body.password;
+  User.findOne({ email: email }, (err, foundUser) => {
+    if (err) {
+      console.log(err);
+    } else {
+      if (foundUser) {
+        if (foundUser.password === password) {
+          res.render("secrets");
         }
-
+      }
+    }
   });
 });
 app.listen(3000);
