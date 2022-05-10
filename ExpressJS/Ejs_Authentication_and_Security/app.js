@@ -58,12 +58,12 @@ app.post("/login", (req, res) => {
   console.log(password);
   User.findOne({ email: email }, (err, foundUser) => {
     if (err) {
-      console.log(password);
+      // console.log(password);
 
       console.log(err);
     } else {
       if (foundUser) {
-        console.log("******************************");
+        // console.log("******************************");
         bcrypt.compare(password, foundUser.password, function (err, result) {
           console.log(result);
           if (result === true) {
