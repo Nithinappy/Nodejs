@@ -6,6 +6,7 @@ const mongoose = require("mongoose");
 const encrypt = require("mongoose-encryption");
 // const md5 = require("md5"); // replaced with bcrypt hashing and salting alg
 const bcrypt = require("bcrypt");
+const jwt = require("jsonwebtoken");
 const saltRounds = 10;
 const app = express();
 app.set("view engine", "ejs");
@@ -47,6 +48,7 @@ app.post("/register", (req, res) => {
         console.log(err);
       } else {
         console.log(hash);
+
         res.render("secrets");
       }
     });
@@ -63,12 +65,19 @@ app.post("/login", (req, res) => {
       console.log(err);
     } else {
       if (foundUser) {
+        foundUser = foundUser;
         // console.log("******************************");
         bcrypt.compare(password, foundUser.password, function (err, result) {
           console.log(result);
           if (result === true) {
+            const token = jwt.sign(
+              { email: foundUser.email, userId: foundUser._id.toString() },
+              "nithinsuperman",
+              { expiresIn: "1h" }
+            );
+            res.send({ token: token, userId: foundUser._id.toString() });
             console.log(password);
-            res.render("secrets");
+            // res.render("secrets");
           }
         });
       }
